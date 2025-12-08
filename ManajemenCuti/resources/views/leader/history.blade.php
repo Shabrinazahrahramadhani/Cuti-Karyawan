@@ -115,13 +115,13 @@
                 </select>
             </div>
 
-            {{-- Tombol --}}
+            {{-- Tombol (SOFT BUTTON) --}}
             <div class="flex items-end justify-start md:justify-end">
                 <button type="submit"
                         class="inline-flex items-center justify-center px-5 py-2.5 rounded-full
-                               bg-purple-600 text-white text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                               shadow-[0_12px_30px_rgba(147,51,234,0.5)]
-                               hover:bg-purple-500 hover:-translate-y-[1px] transition">
+                               bg-purple-50 text-purple-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                               border border-purple-300 shadow-sm
+                               hover:bg-purple-100 hover:border-purple-400 hover:-translate-y-[1px] transition">
                     Terapkan Filter
                 </button>
             </div>
@@ -224,15 +224,23 @@
                                         {{ optional($req->tanggal_pengajuan)->format('d M Y') }}
                                     </td>
 
-                                    {{-- Info Leader --}}
+                                   {{-- Info Leader --}}
                                     <td class="px-4 py-2 text-slate-700 text-[0.7rem]">
-                                        @if($req->approved_leader_at)
-                                            <span class="block font-semibold">Approved</span>
-                                            <span class="block text-slate-500">
-                                                {{ optional($req->approved_leader_at)->format('d M Y') }}
+                                        @if($req->leader_id)
+                                            @php
+                                                $isRejected = $req->status === 'Rejected';
+                                            @endphp
+
+                                            <span class="block font-semibold {{ $isRejected ? 'text-rose-600' : 'text-emerald-600' }}">
+                                                {{ $isRejected ? 'Rejected' : 'Approved' }}
                                             </span>
+
+                                            <span class="block text-slate-500">
+                                                {{ optional($req->approved_leader_at ?? $req->updated_at)->format('d M Y') }}
+                                            </span>
+
                                             <span class="block text-slate-500 text-[0.65rem]">
-                                                {{ optional($req->leader)->name }}
+                                                {{ optional($req->leader)->name ?? '-' }}
                                             </span>
                                         @else
                                             <span class="text-slate-400 text-[0.7rem]">-</span>
@@ -241,13 +249,27 @@
 
                                     {{-- Info HRD --}}
                                     <td class="px-4 py-2 text-slate-700 text-[0.7rem]">
-                                        @if($req->approved_hrd_at)
-                                            <span class="block font-semibold">Approved</span>
-                                            <span class="block text-slate-500">
-                                                {{ optional($req->approved_hrd_at)->format('d M Y') }}
+                                        @php
+                                            // dianggap sudah ada keputusan HRD kalau status final (Approved / Rejected / Cancelled)
+                                            $hasHrdDecision = in_array($req->status, ['Approved', 'Rejected', 'Cancelled']);
+                                            $isRejectedHrd  = $req->status === 'Rejected';
+                                            $hrdName        = optional($req->hrd)->name ?? 'HRD';
+                                            $hrdDate        = $req->approved_hrd_at ?? $req->updated_at;
+                                        @endphp
+
+                                        @if($hasHrdDecision)
+                                            <span class="block font-semibold {{ $isRejectedHrd ? 'text-rose-600' : 'text-emerald-600' }}">
+                                                {{ $isRejectedHrd ? 'Rejected' : 'Approved' }}
                                             </span>
+
+                                            @if($hrdDate)
+                                                <span class="block text-slate-500">
+                                                    {{ optional($hrdDate)->format('d M Y') }}
+                                                </span>
+                                            @endif
+
                                             <span class="block text-slate-500 text-[0.65rem]">
-                                                {{ optional($req->hrd)->name ?? '-' }}
+                                                {{ $hrdName }}
                                             </span>
                                         @else
                                             <span class="text-slate-400 text-[0.7rem]">-</span>

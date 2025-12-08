@@ -33,7 +33,6 @@
             <form action="{{ route('admin.division.store') }}" method="POST" class="space-y-5">
                 @csrf
 
-                {{-- Nama Divisi --}}
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Nama Divisi
@@ -65,7 +64,6 @@
                                focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">{{ old('deskripsi') }}</textarea>
                 </div>
 
-                {{-- Leader --}}
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Leader

@@ -67,7 +67,6 @@ class UserProfileController extends Controller
             $profile->foto = $foto;
         }
 
-
         $profile->save();
 
         if (!empty($validated['password'])) {

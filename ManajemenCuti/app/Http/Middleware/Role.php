@@ -14,9 +14,11 @@ class Role
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $role): Response
+    public function handle(Request $request, Closure $next, $roles): Response
     {
-        if (!$request->user() || request()->user()->role != $role) {
+        $user = $request->user();
+
+        if (!$request->user() || request()->user()->role != $roles) {
             return redirect('login')->with('message', 'You do not have access to this page.');
         }
         return $next($request);

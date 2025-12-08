@@ -119,7 +119,6 @@
         {{-- Quick Action: Ajukan Cuti & Riwayat --}}
         <div class="grid sm:grid-cols-2 gap-4">
 
-            {{-- Ajukan Cuti (conditional, aman kalau profile null) --}}
             @if($profile && $profile->status_aktif)
                 <a href="{{ route('user.leave.create') }}"
                    class="block bg-gradient-to-r from-sky-500 to-sky-400

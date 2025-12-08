@@ -7,7 +7,6 @@
     $user = auth()->user();
     $role = $user->role ?? null;
 
-    // Tentukan URL kembali berdasarkan role
     try {
         $backUrl = match ($role) {
             'Admin'  => route('admin.cuti.index'),
@@ -23,7 +22,12 @@
     $status      = $leave->status ?? 'Pending';
     $statusLower = strtolower($status);
 
-    $leaderDone  = in_array($statusLower, ['approved by leader', 'approved', 'rejected', 'cancelled']);
+    // role pemohon (bisa User atau Leader)
+    $pemohonRole   = optional($leave->user)->role ?? null;
+    $pemohonLeader = strtolower($pemohonRole) === 'leader';
+
+    // leaderDone = hanya jika memang ada proses dari leader (bukan kalau pemohonnya leader)
+    $leaderDone  = !$pemohonLeader && in_array($statusLower, ['approved by leader', 'approved', 'rejected', 'cancelled']);
     $hrdApproved = $statusLower === 'approved';
     $hrdRejected = $statusLower === 'rejected';
     $cancelled   = $statusLower === 'cancelled';
@@ -202,7 +206,13 @@
                 {{-- STEP 2: Verifikasi Ketua Divisi --}}
                 <div class="flex gap-3">
                     <div class="mt-1 flex flex-col items-center">
-                        <div class="w-3 h-3 rounded-full {{ $leaderDone ? 'bg-emerald-500' : 'bg-gray-400' }} border border-[#0f172a]"></div>
+                        <div class="w-3 h-3 rounded-full
+                            @if($pemohonLeader)
+                                bg-gray-400
+                            @else
+                                {{ $leaderDone ? 'bg-emerald-500' : 'bg-gray-400' }}
+                            @endif
+                            border border-[#0f172a]"></div>
                         <div class="w-px flex-1 bg-slate-300 mt-1"></div>
                     </div>
                     <div>
@@ -210,38 +220,47 @@
                             Verifikasi Ketua Divisi
                         </p>
 
-                        <p class="text-xs text-slate-600">
-                            Atasan langsung: <span class="font-semibold">{{ $leaderNama }}</span>
-                        </p>
-
-                        @if($statusLower === 'pending')
+                        @if($pemohonLeader)
+                            {{-- kalau pengaju = Leader, tidak ada verifikasi dari Leader --}}
                             <p class="text-xs text-slate-600 mt-1">
-                                Menunggu verifikasi Ketua Divisi.
+                                Pengajuan ini dibuat oleh <span class="font-semibold">Ketua Divisi</span> dan
+                                langsung diproses oleh <span class="font-semibold">HRD</span> tanpa tahapan verifikasi atasan.
                             </p>
-                        @elseif($statusLower === 'approved by leader')
-                            <p class="text-xs text-emerald-700 mt-1">
-                                Pengajuan telah <span class="font-semibold">disetujui oleh Ketua Divisi</span>
-                                dan sedang menunggu persetujuan HRD.
+                        @else
+                            <p class="text-xs text-slate-600">
+                                Atasan langsung: <span class="font-semibold">{{ $leaderNama }}</span>
                             </p>
-                        @elseif($statusLower === 'approved')
-                            <p class="text-xs text-emerald-700 mt-1">
-                                Pengajuan telah <span class="font-semibold">disetujui oleh Ketua Divisi</span>.
-                            </p>
-                        @elseif($statusLower === 'rejected')
-                            <p class="text-xs text-red-700 mt-1">
-                                Pengajuan telah <span class="font-semibold">ditolak</span>
-                                (oleh Leader atau HRD).
-                            </p>
-                        @elseif($statusLower === 'cancelled')
-                            <p class="text-xs text-slate-700 mt-1">
-                                Pengajuan dibatalkan sebelum proses verifikasi selesai.
-                            </p>
-                        @endif
 
-                        @if(!empty($leave->approved_leader_at))
-                            <p class="text-[0.7rem] text-slate-500 mt-1">
-                                Diproses pada: {{ \Carbon\Carbon::parse($leave->approved_leader_at)->format('d M Y · H:i') }}
-                            </p>
+                            @if($statusLower === 'pending')
+                                <p class="text-xs text-slate-600 mt-1">
+                                    Menunggu verifikasi Ketua Divisi.
+                                </p>
+                            @elseif($statusLower === 'approved by leader')
+                                <p class="text-xs text-emerald-700 mt-1">
+                                    Pengajuan telah <span class="font-semibold">disetujui oleh Ketua Divisi</span>
+                                    dan sedang menunggu persetujuan HRD.
+                                </p>
+                            @elseif($statusLower === 'approved')
+                                <p class="text-xs text-emerald-700 mt-1">
+                                    Pengajuan telah melewati tahapan verifikasi
+                                    <span class="font-semibold">Ketua Divisi</span>.
+                                </p>
+                            @elseif($statusLower === 'rejected')
+                                <p class="text-xs text-red-700 mt-1">
+                                    Pengajuan telah <span class="font-semibold">ditolak</span>
+                                    (oleh Leader atau HRD).
+                                </p>
+                            @elseif($statusLower === 'cancelled')
+                                <p class="text-xs text-slate-700 mt-1">
+                                    Pengajuan dibatalkan sebelum proses verifikasi selesai.
+                                </p>
+                            @endif
+
+                            @if(!empty($leave->approved_leader_at))
+                                <p class="text-[0.7rem] text-slate-500 mt-1">
+                                    Diproses pada: {{ \Carbon\Carbon::parse($leave->approved_leader_at)->format('d M Y · H:i') }}
+                                </p>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -284,7 +303,12 @@
                             </p>
                         @else
                             <p class="text-xs text-slate-600 mt-1">
-                                Menunggu persetujuan HRD setelah disetujui oleh Ketua Divisi.
+                                Menunggu persetujuan HRD
+                                @if(!$pemohonLeader)
+                                    setelah disetujui oleh Ketua Divisi.
+                                @else
+                                    sebagai persetujuan final.
+                                @endif
                             </p>
                         @endif
 

@@ -14,7 +14,6 @@
 
 <div class="max-w-6xl mx-auto mt-10 px-4 anim-page">
 
-    {{-- Flash --}}
     @if(session('success'))
         <div class="mb-4 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm">
             <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
@@ -32,7 +31,6 @@
         </div>
     @endif
 
-    {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-2xl font-semibold text-slate-900 flex items-center gap-3">
@@ -54,7 +52,6 @@
         </a>
     </div>
 
-    {{-- Card Info Divisi --}}
     <div class="grid md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-2xl shadow-[0_10px_26px_rgba(15,23,42,0.06)] border border-slate-200 p-4">
             <div class="text-xs text-slate-500 tracking-[0.16em] uppercase mb-1">
@@ -93,7 +90,6 @@
         </div>
     </div>
 
-    {{-- Tambah Anggota --}}
     <div class="bg-white rounded-2xl shadow-[0_10px_26px_rgba(15,23,42,0.06)] border border-slate-200 p-4 mb-6">
         <h3 class="text-sm font-semibold text-slate-900 mb-3 tracking-[0.14em] uppercase">
             Tambah Anggota Divisi
@@ -119,12 +115,11 @@
         </form>
         @if($candidateProfiles->isEmpty())
             <p class="mt-2 text-[0.7rem] text-slate-400">
-                Tidak ada karyawan (role User) yang belum memiliki divisi.
+                Tidak ada karyawan yang belum memiliki divisi.
             </p>
         @endif
     </div>
 
-    {{-- Daftar Anggota --}}
     <div class="bg-white rounded-2xl shadow-[0_12px_32px_rgba(15,23,42,0.08)] border border-slate-200 p-4">
         <h3 class="text-sm font-semibold text-slate-900 mb-3 tracking-[0.14em] uppercase">
             Anggota Divisi
@@ -139,7 +134,7 @@
                         <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-slate-500">Email</th>
                         <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-slate-500">Status</th>
                         <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-slate-500">Masa Kerja</th>
-                        <th class="px-4 py-3 text-center text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-slate-500">Aksi</th>
+                        <th class="px-4 py-3 text-center text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-slate-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">

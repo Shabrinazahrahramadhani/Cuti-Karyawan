@@ -122,16 +122,16 @@
                 </h2>
 
                 <div class="flex items-center gap-4">
-                   @if($profile->foto)
-                        <img src="{{ asset('storage/' . $profile->foto) }}"
-                            class="w-40 h-40 rounded-full object-cover shadow"
-                            alt="Foto Profil">
+                   @if(optional($profile)->foto)
+                        <img src="{{ asset('storage/' . optional($profile)->foto) }}"
+                            alt="Foto Profil"
+                            class="w-16 h-16 rounded-full object-cover border border-slate-300">
                     @else
-                        <img src="{{ asset('images/default-avatar.png') }}"
-                            class="w-40 h-40 rounded-full object-cover shadow"
-                            alt="Default Foto Profil">
+                        {{-- placeholder kalau belum ada foto --}}
+                        <div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-500">
+                            No Photo
+                        </div>
                     @endif
-
                     <div class="space-y-1">
                         <input type="file" name="foto"
                                class="block w-full text-xs text-slate-700

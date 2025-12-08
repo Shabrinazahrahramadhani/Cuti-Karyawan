@@ -62,6 +62,7 @@ class LeaveRequestController extends Controller
             ]);
         }
 
+        // Validasi khusus Cuti Tahunan
         if ($jenisCuti === 'Tahunan') {
             if (!$profile) {
                 return back()->withInput()->withErrors([
@@ -91,6 +92,7 @@ class LeaveRequestController extends Controller
             }
         }
 
+        // Cek tabrakan dengan cuti lain yang sudah disetujui
         $adaTabrakan = LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', ['Approved', 'Approved by Leader'])
             ->where(function ($q) use ($mulai, $selesai) {
@@ -109,37 +111,62 @@ class LeaveRequestController extends Controller
             ]);
         }
 
+        // Upload surat dokter jika ada
         $suratDokterPath = null;
         if ($request->hasFile('surat_dokter')) {
             $suratDokterPath = $request->file('surat_dokter')->store('surat_dokter', 'public');
         }
 
+        // =========================
+        // STATUS AWAL & LEADER INFO
+        // =========================
+
+        // Anggap siapapun yang role-nya BUKAN 'user' (case-insensitive) adalah atasan (leader)
+        $isLeader = (strtolower($user->role) !== 'user');
+
+        $statusAwal       = $isLeader ? 'Approved by Leader' : 'Pending';
+        $leaderId         = $isLeader ? $user->id : null;
+        $approvedLeaderAt = $isLeader ? now() : null;
+        $catatanLeader    = $isLeader ? 'Pengajuan cuti pribadi atasan (auto-approve).' : null;
+
         $data = [
-            'user_id'           => $user->id,
-            'jenis_cuti'        => $jenisCuti,
-            'tanggal_pengajuan' => $tanggalPengajuan,
-            'tanggal_mulai'     => $mulai,
-            'tanggal_selesai'   => $selesai,
-            'total_hari'        => $totalHariKerja,
-            'alasan'            => $validated['alasan'],
-            'alamat_selama_cuti'=> $validated['alamat_selama_cuti'] ?? null,
-            'nomor_darurat'     => $validated['nomor_darurat'] ?? null,
-            'status'            => 'Pending',
+            'user_id'            => $user->id,
+            'jenis_cuti'         => $jenisCuti,
+            'tanggal_pengajuan'  => $tanggalPengajuan,
+            'tanggal_mulai'      => $mulai,
+            'tanggal_selesai'    => $selesai,
+            'total_hari'         => $totalHariKerja,
+            'alasan'             => $validated['alasan'],
+            'alamat_selama_cuti' => $validated['alamat_selama_cuti'] ?? null,
+            'nomor_darurat'      => $validated['nomor_darurat'] ?? null,
+            'status'             => $statusAwal,
         ];
 
         if ($suratDokterPath) {
             $data['surat_dokter'] = $suratDokterPath;
         }
 
+        // isi kolom leader_* kalau ada
+        if ($leaderId && Schema::hasColumn('leave_requests', 'leader_id')) {
+            $data['leader_id'] = $leaderId;
+        }
+        if ($approvedLeaderAt && Schema::hasColumn('leave_requests', 'approved_leader_at')) {
+            $data['approved_leader_at'] = $approvedLeaderAt;
+        }
+        if ($catatanLeader && Schema::hasColumn('leave_requests', 'catatan_leader')) {
+            $data['catatan_leader'] = $catatanLeader;
+        }
+
         LeaveRequest::create($data);
 
+        // Potong kuota kalau tahunan
         if ($jenisCuti === 'Tahunan' && $profile) {
             $profile->kuota_cuti = max(0, ($profile->kuota_cuti ?? 0) - $totalHariKerja);
             $profile->save();
         }
 
         return redirect()
-            ->route('leave.history')
+            ->route('user.leave.history')
             ->with('success', 'Pengajuan cuti berhasil dikirim dan menunggu persetujuan.');
     }
 
@@ -193,7 +220,7 @@ class LeaveRequestController extends Controller
         $leaveRequest->save();
 
         return redirect()
-            ->route('leave.history')
+            ->route('user.leave.history')
             ->with('success', 'Pengajuan cuti berhasil dibatalkan. Alasan: ' . $alasanPembatalan);
     }
 
@@ -215,8 +242,6 @@ class LeaveRequestController extends Controller
 
     public function show(LeaveRequest $leaveRequest)
     {
-        $user = auth()->user();
-
         $leaveRequest->load([
             'user.profile.division',
             'leader',

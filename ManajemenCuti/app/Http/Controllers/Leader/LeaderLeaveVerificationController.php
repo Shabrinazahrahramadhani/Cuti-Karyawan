@@ -16,6 +16,7 @@ class LeaderLeaveVerificationController extends Controller
     {
         $leader = Auth::user();
 
+        // cari divisi yang dipimpin leader ini
         $division = Division::where('ketua_divisi_id', $leader->id)->first();
 
         if (!$division) {
@@ -25,7 +26,9 @@ class LeaderLeaveVerificationController extends Controller
             ]);
         }
 
+        // ambil anggota divisi, TAPI exclude leader sendiri
         $anggotaIds = UserProfile::where('divisi_id', $division->id)
+            ->where('user_id', '!=', $leader->id)
             ->pluck('user_id');
 
         $requests = LeaveRequest::with('user.profile')
@@ -58,14 +61,26 @@ class LeaderLeaveVerificationController extends Controller
             'note' => 'nullable|string|max:500',
         ]);
 
+        // CEK: leader tidak boleh memproses pengajuan dirinya sendiri
+        if ($leaveRequest->user_id === $leader->id) {
+            return back()->with('error', 'Leader tidak dapat menyetujui pengajuan cutinya sendiri. Pengajuan ini akan diproses oleh HRD.');
+        }
+
         if (!$this->bolehMemproses($leader->id, $leaveRequest)) {
             abort(403, 'Anda tidak berwenang memproses pengajuan ini.');
         }
 
-        $leaveRequest->update([
+        // siapkan data update
+        $updateData = [
             'status'    => 'Approved by Leader',
             'leader_id' => $leader->id,
-        ]);
+        ];
+
+        if (Schema::hasColumn('leave_requests', 'approved_leader_at')) {
+            $updateData['approved_leader_at'] = now();
+        }
+
+        $leaveRequest->update($updateData);
 
         return back()->with('success', 'Pengajuan cuti disetujui oleh Leader.');
     }
@@ -78,17 +93,33 @@ class LeaderLeaveVerificationController extends Controller
             'note' => 'required|string|min:5',
         ]);
 
+        // CEK: leader tidak boleh memproses pengajuan dirinya sendiri
+        if ($leaveRequest->user_id === $leader->id) {
+            return back()->with('error', 'Leader tidak dapat menolak pengajuan cutinya sendiri. Pengajuan ini akan diproses oleh HRD.');
+        }
+
         if (!$this->bolehMemproses($leader->id, $leaveRequest)) {
             abort(403, 'Anda tidak berwenang memproses pengajuan ini.');
         }
 
         $updateData = [
-            'status'    => 'Rejected by Leader',
+            'status'    => 'Rejected',
             'leader_id' => $leader->id,
         ];
 
+        if (Schema::hasColumn('leave_requests', 'approved_leader_at')) {
+            $updateData['approved_leader_at'] = now();
+        }
+
         if (Schema::hasColumn('leave_requests', 'catatan_penolakan')) {
             $updateData['catatan_penolakan'] = $request->note;
+        }
+
+        // kalau karyawan (bukan leader) ditolak dan jenis cuti tahunan → kuota dikembalikan
+        $profile = optional($leaveRequest->user)->profile;
+        if ($leaveRequest->jenis_cuti === 'Tahunan' && $profile) {
+            $profile->kuota_cuti = ($profile->kuota_cuti ?? 0) + $leaveRequest->total_hari;
+            $profile->save();
         }
 
         $leaveRequest->update($updateData);
@@ -98,19 +129,26 @@ class LeaderLeaveVerificationController extends Controller
 
     protected function bolehMemproses(int $leaderId, LeaveRequest $leaveRequest): bool
     {
+        // 1) leader tidak boleh memproses cutinya sendiri
+        if ($leaveRequest->user_id === $leaderId) {
+            return false;
+        }
+
         $divisionLeader = Division::where('ketua_divisi_id', $leaderId)->first();
 
         if (!$divisionLeader) {
             return false;
         }
 
-        $user = $leaveRequest->user;
+        $user        = $leaveRequest->user;
         $profileUser = $user?->profile;
 
         if ($profileUser && $profileUser->divisi_id) {
+            // hanya boleh memproses anggota di divisinya sendiri
             return $profileUser->divisi_id === $divisionLeader->id;
         }
 
-        return true;
+        // kalau user tidak punya divisi yang jelas, amankan saja: jangan boleh
+        return false;
     }
 }

@@ -38,6 +38,21 @@ class LeaveRequest extends Model
         'approved_hrd_at'   => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function (LeaveRequest $leave) {
+        if (
+                    $leave->status === 'Approved by Leader'
+                    && $leave->user
+                    && $leave->user->role === 'Leader'
+                ) {
+                    $leave->status = 'Pending';
+                }
+            });
+    }
+
+
+
     public function user()
     {
         return $this->belongsTo(User::class);

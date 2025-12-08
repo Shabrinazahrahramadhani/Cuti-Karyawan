@@ -24,7 +24,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Redirect dashboard ke halaman sesuai role
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
@@ -64,21 +63,16 @@ Route::middleware(['auth', 'role:Admin'])
     ->name('admin.')
     ->group(function () {
 
-        // Dashboard Admin
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-        // Manajemen User (resource)
-        // => admin.manajemen_user.index, admin.manajemen_user.create, dst.
         Route::resource('users', ManajemenUserController::class)
             ->names('manajemen_user')
             ->parameters(['users' => 'manajemen_user']);
 
-        // Toggle aktif
         Route::patch('/users/{manajemen_user}/toggle-active',
             [ManajemenUserController::class, 'toggleActive']
         )->name('manajemen_user.toggle_active');
 
-        // Manajemen Divisi
         Route::get('/division',                 [DivisionController::class, 'index'])->name('division.index');
         Route::get('/division/create',          [DivisionController::class, 'create'])->name('division.create');
         Route::post('/division',                [DivisionController::class, 'store'])->name('division.store');
@@ -89,12 +83,9 @@ Route::middleware(['auth', 'role:Admin'])
         Route::post('/division/{division}/members', [DivisionController::class, 'addMember'])->name('division.members.add');
         Route::delete('/division/{division}/members/{user}', [DivisionController::class, 'removeMember']) ->name('division.members.remove');
 
-
-        // Cuti
         Route::get('/cuti',        [CutiController::class, 'index'])->name('cuti.index');
         Route::get('/cuti/{cuti}', [CutiController::class, 'show'])->name('cuti.show');
 
-        // Laporan Masalah
         Route::get('/laporan_masalah', [LaporanMasalahController::class, 'index'])->name('laporan_masalah.index');
     });
 
@@ -150,13 +141,14 @@ Route::middleware(['auth', 'role:Leader'])->group(function () {
 // USER
 // =======================
 
-Route::middleware(['auth', 'role:User'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
     Route::get('/user/leave/create',        [LeaveRequestController::class, 'create'])->name('user.leave.create');
     Route::post('/leave',             [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::get('/user/leave/history',      [LeaveRequestController::class, 'history'])->name('user.leave.history');
+    Route::get('/user/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('user.leave.show');
     Route::post('/leave/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave.cancel');
 
 });

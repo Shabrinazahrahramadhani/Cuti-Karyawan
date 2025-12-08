@@ -26,7 +26,7 @@
             </div>
             <p class="text-xs sm:text-sm text-slate-600 max-w-2xl">
                 Halo, {{ auth()->user()->name }} ✨ — pantau pengajuan cuti, status verifikasi,
-                dan kondisi tim kamu dalam satu tampilan yang rapi.
+                dan kondisi tim kamu.
             </p>
         </div>
 
@@ -62,49 +62,58 @@
         </div>
     @else
 
-        {{-- ========= KARTU STATISTIK ========= --}}
+        {{-- ========= KARTU STATISTIK (GAYA PUTIH SEPERTI ADMIN) ========= --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {{-- Pengajuan Masuk Bulan Ini --}}
-            <div class="rounded-3xl bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50
-                        border border-emerald-200 px-5 py-4 shadow-[0_16px_40px_rgba(16,185,129,0.25)]">
-                <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-emerald-700">
-                    Pengajuan Masuk Bulan Ini
-                </p>
-                <p class="mt-3 text-4xl font-bold text-emerald-700">
+            <div class="rounded-3xl bg-white border border-slate-200 shadow-sm px-5 py-4">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-slate-500">
+                            Pengajuan Masuk Bulan Ini
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-3 text-4xl font-semibold text-slate-900">
                     {{ $pengajuanMasuk ?? 0 }}
                 </p>
-                <p class="mt-1 text-[0.7rem] text-emerald-800">
+                <p class="mt-1 text-[0.7rem] text-slate-600">
                     Total pengajuan cuti dari anggota divisi di bulan berjalan.
                 </p>
             </div>
 
-            {{-- Menunggu Verifikasi --}}
+            {{-- Menunggu Verifikasi (LINK) --}}
             <a href="{{ route('verifications.index') }}"
-               class="block rounded-3xl bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-50
-                      border border-amber-200 px-5 py-4 shadow-[0_16px_40px_rgba(234,179,8,0.25)]
-                      hover:shadow-[0_20px_50px_rgba(202,138,4,0.35)] hover:-translate-y-[1px] transition">
-                <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-amber-700">
-                    Menunggu Verifikasi
-                </p>
-                <p class="mt-3 text-4xl font-bold text-amber-700">
+               class="block rounded-3xl bg-white border border-slate-200 shadow-sm px-5 py-4
+                      hover:shadow-md hover:-translate-y-[1px] transition">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-slate-500">
+                            Menunggu Verifikasi
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-3 text-4xl font-semibold text-slate-900">
                     {{ $pendingVerifikasi ?? 0 }}
                 </p>
-                <p class="mt-1 text-[0.7rem] text-amber-800">
+                <p class="mt-1 text-[0.7rem] text-slate-600">
                     Klik kartu ini untuk melihat pengajuan yang perlu kamu proses.
                 </p>
             </a>
 
             {{-- Sedang Cuti Minggu Ini --}}
-            <div class="rounded-3xl bg-gradient-to-br from-sky-50 via-blue-100 to-sky-50
-                        border border-sky-200 px-5 py-4 shadow-[0_16px_40px_rgba(59,130,246,0.25)]">
-                <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-sky-700">
-                    Sedang Cuti Minggu Ini
-                </p>
-                <p class="mt-3 text-4xl font-bold text-sky-700">
+            <div class="rounded-3xl bg-white border border-slate-200 shadow-sm px-5 py-4">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <p class="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-slate-500">
+                            Sedang Cuti Minggu Ini
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-3 text-4xl font-semibold text-slate-900">
                     {{ $sedangCuti ?? 0 }}
                 </p>
-                <p class="mt-1 text-[0.7rem] text-sky-800">
+                <p class="mt-1 text-[0.7rem] text-slate-600">
                     Jumlah anggota divisi yang sedang cuti pada minggu ini.
                 </p>
             </div>

@@ -33,7 +33,7 @@
                 </span>
             </h2>
             <p class="mt-2 text-xs text-slate-500">
-                Rincian lengkap pengajuan cuti, termasuk timeline approval dan catatan HRD/Leader.
+                Rincian lengkap pengajuan cuti
             </p>
         </div>
 
@@ -56,6 +56,17 @@
         $user        = $leave->user;
         $profile     = optional($user)->profile;
         $division    = optional($profile)->division;
+
+        // fallback alamat & nomor kalau di tabel cuti kosong
+        $alamatCuti  = $leave->alamat_selama_cuti
+                        ?? $leave->alamat
+                        ?? ($profile->alamat ?? null);
+
+        $kontakCuti  = $leave->nomor_darurat
+                        ?? ($profile->nomor_telepon ?? null);
+
+        // pengaju adalah leader atau bukan
+        $pemohonLeader = optional($leave->user)->role === 'Leader';
     @endphp
 
     {{-- INFO UTAMA --}}
@@ -124,10 +135,10 @@
                 </p>
                 <p class="mt-1 text-slate-800">
                     <span class="block">
-                        Alamat: {{ $leave->alamat_selama_cuti ?? '-' }}
+                        Alamat: {{ $alamatCuti ?? '-' }}
                     </span>
                     <span class="block">
-                        Nomor: {{ $leave->nomor_darurat ?? '-' }}
+                        Nomor: {{ $kontakCuti ?? '-' }}
                     </span>
                 </p>
             </div>
@@ -165,37 +176,51 @@
             </div>
 
             {{-- Step 2: Leader --}}
+            @php
+                $step2Done = !empty($leave->approved_leader_at) || in_array($status, ['Approved by Leader', 'Approved', 'Rejected']);
+            @endphp
             <div class="flex gap-3">
                 <div class="flex flex-col items-center">
-                    @php
-                        $step2Done = !empty($leave->approved_leader_at) || in_array($status, ['Approved by Leader', 'Approved', 'Rejected']);
-                    @endphp
                     <div class="w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm
-                                {{ $step2Done ? 'bg-sky-500' : 'bg-slate-300' }}"></div>
+                        {{ $pemohonLeader ? 'bg-slate-300' : ($step2Done ? 'bg-sky-500' : 'bg-slate-300') }}">
+                    </div>
                     <div class="flex-1 w-px bg-slate-200 mt-1"></div>
                 </div>
                 <div class="flex-1">
                     <p class="text-[0.8rem] font-semibold text-slate-900">
                         Verifikasi Ketua Divisi
                     </p>
-                    <p class="text-[0.75rem] text-slate-600">
-                        Atasan: {{ optional($leave->leader)->name ?? '-' }}
-                    </p>
 
-                    @if($step2Done)
-                        <p class="text-[0.75rem] text-slate-700 mt-1">
-                            Status:
-                            <span class="font-semibold text-slate-900">
-                                {{ $status === 'Approved by Leader' || $status === 'Approved' ? 'Disetujui Leader' : 'Diproses' }}
-                            </span>
-                        </p>
-                        <p class="text-[0.7rem] text-slate-500 mt-1">
-                            {{ \Carbon\Carbon::parse($leave->approved_leader_at)->format('d M Y · H:i') }}
+                    @if($pemohonLeader)
+                        {{-- kasus: pengaju cuti adalah leader sendiri --}}
+                        <p class="text-[0.75rem] text-slate-600 mt-1">
+                            Pengajuan ini dibuat oleh
+                            <span class="font-semibold">{{ $profile->nama_lengkap ?? $user->name ?? 'Tanpa Nama' }}</span>
+                            yang juga menjabat sebagai Ketua Divisi.
                         </p>
                     @else
-                        <p class="text-[0.75rem] text-slate-500 mt-1 italic">
-                            Menunggu verifikasi Ketua Divisi.
+                        {{-- kasus: pengaju cuti adalah karyawan biasa --}}
+                        <p class="text-[0.75rem] text-slate-600">
+                            Atasan: {{ optional($leave->leader)->name ?? '-' }}
                         </p>
+
+                        @if($step2Done)
+                            <p class="text-[0.75rem] text-slate-700 mt-1">
+                                Status:
+                                <span class="font-semibold text-slate-900">
+                                    {{ $status === 'Approved by Leader' || $status === 'Approved' ? 'Disetujui Leader' : 'Diproses' }}
+                                </span>
+                            </p>
+                            @if(!empty($leave->approved_leader_at))
+                                <p class="text-[0.7rem] text-slate-500 mt-1">
+                                    {{ \Carbon\Carbon::parse($leave->approved_leader_at)->format('d M Y · H:i') }}
+                                </p>
+                            @endif
+                        @else
+                            <p class="text-[0.75rem] text-slate-500 mt-1 italic">
+                                Menunggu verifikasi Ketua Divisi.
+                            </p>
+                        @endif
                     @endif
                 </div>
             </div>

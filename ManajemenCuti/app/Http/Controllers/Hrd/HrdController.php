@@ -13,27 +13,19 @@ use Illuminate\Support\Facades\Schema;
 
 class HrdController extends Controller
 {
-    /**
-     * DASHBOARD HRD
-     * route: GET /hrd/dashboard  → name: hrd.dashboard
-     */
     public function index()
     {
         $now        = Carbon::now();
         $startMonth = $now->copy()->startOfMonth();
         $endMonth   = $now->copy()->endOfMonth();
 
-        // Total pengajuan cuti bulan ini (semua status)
         $totalCutiBulanIni = LeaveRequest::whereBetween('tanggal_pengajuan', [
             $startMonth->toDateString(),
             $endMonth->toDateString(),
         ])->count();
 
-        // Pengajuan yang menunggu final approval HRD
-        // Alur 1: status = "Approved by Leader"
-        // Alur 2: status = "Pending" & pengaju adalah Leader (ketua divisi)
         $pendingFinal = LeaveRequest::with([
-                'user.profile',   // cukup sampai profile saja
+                'user.profile',
                 'leader',
             ])
             ->where(function ($q) {
@@ -41,16 +33,15 @@ class HrdController extends Controller
                   ->orWhere(function ($q2) {
                       $q2->where('status', 'Pending')
                          ->whereHas('user', function ($u) {
-                             $u->where('role', 'Leader'); // role di DB kamu: Leader
+                             $u->whereIn('role', ['Leader', 'Ketua Divisi']);
                          });
                   });
             })
             ->orderBy('tanggal_pengajuan', 'desc')
-            ->get(); // dipakai di Blade: ->count(), foreach, dll
+            ->get();
 
-        // Karyawan yang sedang cuti bulan ini
         $sedangCutiBulanIni = LeaveRequest::with([
-                'user.profile',   // cukup profile
+                'user.profile',
             ])
             ->where('status', 'Approved')
             ->where(function ($q) use ($startMonth, $endMonth) {
@@ -60,45 +51,44 @@ class HrdController extends Controller
             ->orderBy('tanggal_mulai')
             ->get();
 
-        // Daftar divisi untuk panel kanan
         $divisions = Division::with('ketuaDivisi')
             ->withCount('members')
             ->orderBy('nama_divisi')
             ->get();
 
         return view('hrd.dashboard', [
-            'totalCutiBulanIni' => $totalCutiBulanIni,
-            'pendingFinal'      => $pendingFinal,
-            'sedangCutiBulanIni'=> $sedangCutiBulanIni,
-            'divisions'         => $divisions,
+            'totalCutiBulanIni'  => $totalCutiBulanIni,
+            'pendingFinal'       => $pendingFinal,
+            'sedangCutiBulanIni' => $sedangCutiBulanIni,
+            'divisions'          => $divisions,
         ]);
     }
 
- 
     public function approvals(Request $request)
     {
         $statusFilter = $request->status;
 
         $query = LeaveRequest::with([
-                'user.profile',   
+                'user.profile',
                 'leader',
                 'hrd',
             ])
             ->orderBy('tanggal_pengajuan', 'desc');
 
-        if ($statusFilter =='all') {
-            $query->where('status', $statusFilter);
-        } else {
-            
+        if ($statusFilter === null || $statusFilter === '' || $statusFilter === 'pending') {
             $query->where(function ($q) {
                 $q->where('status', 'Approved by Leader')
                   ->orWhere(function ($q2) {
                       $q2->where('status', 'Pending')
                          ->whereHas('user', function ($u) {
-                             $u->where('role', 'Leader');
+                             $u->whereIn('role', ['Leader', 'Ketua Divisi']);
                          });
                   });
             });
+        } elseif ($statusFilter === 'all') {
+            // tampilkan semua, tanpa filter status
+        } else {
+            $query->where('status', $statusFilter);
         }
 
         $requests = $query->paginate(10)->withQueryString();
@@ -109,23 +99,21 @@ class HrdController extends Controller
         ]);
     }
 
-  
     public function process(Request $request, LeaveRequest $leaveRequest)
     {
-       
+        // kalau sudah final, jangan diproses lagi
         if (in_array($leaveRequest->status, ['Approved', 'Rejected', 'Cancelled'])) {
             return back()->with('error', 'Pengajuan ini sudah memiliki keputusan final.');
         }
 
+        $action = $request->input('action');
+
         $rules = [
             'action' => 'required|in:approve,reject',
+            'note'   => $action === 'reject'
+                        ? 'required|string|min:10'
+                        : 'nullable|string',
         ];
-
-        if ($request->input('action') === 'reject') {
-            $rules['note'] = 'required|string|min:10';
-        } else {
-            $rules['note'] = 'nullable|string';
-        }
 
         $messages = [
             'note.required' => 'Catatan wajib diisi jika pengajuan ditolak.',
@@ -135,8 +123,8 @@ class HrdController extends Controller
         $validated = $request->validate($rules, $messages);
         $hrd       = Auth::user();
 
-        if ($validated['action'] === 'approve') {
-          
+        // === APPROVE ===
+        if ($action === 'approve') {
             $leaveRequest->status = 'Approved';
 
             if (Schema::hasColumn('leave_requests', 'hrd_id')) {
@@ -151,8 +139,9 @@ class HrdController extends Controller
             return back()->with('success', 'Pengajuan cuti disetujui oleh HRD.');
         }
 
+        // === REJECT ===
+        // kembalikan kuota kalau jenis Tahunan
         $profile = optional($leaveRequest->user)->profile;
-
         if ($leaveRequest->jenis_cuti === 'Tahunan' && $profile) {
             $profile->kuota_cuti = ($profile->kuota_cuti ?? 0) + $leaveRequest->total_hari;
             $profile->save();
@@ -175,21 +164,23 @@ class HrdController extends Controller
         return back()->with('success', 'Pengajuan cuti ditolak oleh HRD.');
     }
 
-  
     public function bulkProcess(Request $request)
     {
+        $action = $request->input('action');
+
         $rules = [
             'action'      => 'required|in:approve,reject',
             'selected'    => 'required|array|min:1',
             'selected.*'  => 'integer|exists:leave_requests,id',
+            'note'        => $action === 'reject'
+                                ? 'required|string|min:10'
+                                : 'nullable|string',
         ];
-
-        if ($request->input('action') === 'reject') {
-            $rules['note'] = 'required|string|min:10';
 
         $messages = [
             'selected.required' => 'Pilih minimal satu pengajuan cuti.',
             'selected.min'      => 'Pilih minimal satu pengajuan cuti.',
+            'note.required'     => 'Catatan wajib diisi jika pengajuan ditolak.',
             'note.min'          => 'Catatan penolakan minimal 10 karakter.',
         ];
 
@@ -198,7 +189,6 @@ class HrdController extends Controller
         $hrd    = Auth::user();
         $ids    = $validated['selected'];
         $note   = $validated['note'] ?? null;
-        $action = $validated['action'];
 
         $leaves = LeaveRequest::with('user.profile')
             ->whereIn('id', $ids)
@@ -207,7 +197,6 @@ class HrdController extends Controller
         $processedCount = 0;
 
         foreach ($leaves as $leaveRequest) {
-            
             if (in_array($leaveRequest->status, ['Approved', 'Rejected', 'Cancelled'])) {
                 continue;
             }
@@ -222,7 +211,7 @@ class HrdController extends Controller
                     $leaveRequest->approved_hrd_at = now();
                 }
             } else {
-               
+                // REJECT (bulk)
                 $profile = optional($leaveRequest->user)->profile;
 
                 if ($leaveRequest->jenis_cuti === 'Tahunan' && $profile) {
@@ -247,12 +236,16 @@ class HrdController extends Controller
             $processedCount++;
         }
 
-        return back()->with('success', "Berhasil memproses {$processedCount} pengajuan cuti.");
+        $msg = $action === 'approve'
+            ? "Berhasil menyetujui {$processedCount} pengajuan cuti."
+            : "Berhasil menolak {$processedCount} pengajuan cuti.";
+
+        return back()->with('success', $msg);
     }
-}
+
     public function history(Request $request)
     {
-        $status    = $request->status;      
+        $status    = $request->status;
         $jenisCuti = $request->jenis_cuti;
 
         $query = LeaveRequest::with([
@@ -279,7 +272,6 @@ class HrdController extends Controller
             'jenisCuti' => $jenisCuti,
         ]);
     }
-
 
     public function reports(Request $request)
     {
@@ -339,12 +331,11 @@ class HrdController extends Controller
         ]);
     }
 
-
     public function divisions()
     {
         $divisions = Division::with([
-                'ketuaDivisi.profile', 
-                'members.user',        
+                'ketuaDivisi.profile',
+                'members.user',
             ])
             ->withCount('members')
             ->orderBy('nama_divisi')

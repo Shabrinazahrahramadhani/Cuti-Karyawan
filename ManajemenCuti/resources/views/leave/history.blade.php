@@ -66,7 +66,7 @@
                     <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Hari</th>
                     <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Status</th>
                     <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Alasan</th>
-                    <th class="px-4 py-3 text-center text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Aksi</th>
+                    <th class="px-4 py-3 text-center text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Actions</th>
                 </tr>
             </thead>
 

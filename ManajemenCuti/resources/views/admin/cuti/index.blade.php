@@ -2,7 +2,6 @@
 
 @section('content')
 
-{{-- ANIMASI --}}
 <style>
     @keyframes fadeInUpSoft {
         from { opacity: 0; transform: translateY(16px); }
@@ -42,7 +41,6 @@
 
 <div class="max-w-6xl mx-auto mt-10 px-4 anim-fade">
 
-    {{-- Flash success --}}
     @if(session('success'))
         <div class="mb-6 inline-flex items-center gap-3 px-5 py-3 bg-emerald-50 border border-emerald-500 
                     text-emerald-700 rounded-2xl shadow-sm anim-scale-in">
@@ -50,7 +48,7 @@
                 ✓
             </span>
             <span class="text-sm font-semibold">
-                {{ session('success') }}
+
             </span>
         </div>
     @endif
@@ -73,7 +71,7 @@
         </div>
     </div>
 
-    {{-- FILTER BAR (disederhanakan) --}}
+    {{-- FILTER BAR --}}
     <div class="mb-6 bg-white border border-slate-200 rounded-3xl 
                 shadow-[0_8px_22px_rgba(15,23,42,0.08)] p-5 anim-fade-up-delay-1">
 
@@ -120,14 +118,14 @@
             {{-- Tombol --}}
             <div class="lg:col-span-3 flex justify-end gap-2 mt-2">
                 <a href="{{ route('admin.cuti.index') }}"
-                   class="px-4 py-2 rounded-full bg-white text-slate-800 text-xs font-semibold uppercase
-                          border border-slate-300 shadow-sm hover:bg-slate-50 transition">
+                   class="px-4 py-2 rounded-full bg-white text-slate-700 text-xs font-semibold uppercase
+                          border border-slate-300 shadow-sm hover:bg-slate-50 hover:border-slate-400 transition">
                     Reset
                 </a>
                 <button type="submit"
-                        class="px-5 py-2 rounded-full bg-gradient-to-r from-sky-600 to-indigo-600
-                               text-slate-100 text-xs font-semibold uppercase shadow-[0_6px_18px_rgba(37,99,235,0.35)]
-                               hover:from-sky-500 hover:to-indigo-500 transition">
+                        class="px-5 py-2 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold uppercase
+                               border border-sky-300 shadow-sm
+                               hover:bg-sky-100 hover:border-sky-400 transition">
                     Filter
                 </button>
             </div>
@@ -171,8 +169,7 @@
                 rounded-3xl border border-slate-200 anim-fade-up-delay-2">
 
         <table class="min-w-full">
-
-            {{-- header sekarang terang & teks gelap --}}
+            
             <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
                     <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-slate-600">No</th>
@@ -237,10 +234,10 @@
 
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('admin.cuti.show',$cuti->id) }}"
-                               class="inline-block bg-sky-600 text-slate-100 py-1.5 px-3 rounded-full
-                                      text-[0.7rem] font-semibold uppercase
-                                      shadow-[0_5px_12px_rgba(37,99,235,0.38)]
-                                      hover:bg-sky-500 transition">
+                               class="inline-block py-1.5 px-3 rounded-full
+                                      bg-sky-50 text-sky-700 text-[0.7rem] font-semibold uppercase
+                                      border border-sky-300 shadow-sm
+                                      hover:bg-sky-100 hover:border-sky-400 transition">
                                 Detail
                             </a>
                         </td>

@@ -15,7 +15,7 @@
 <div class="max-w-4xl mx-auto mt-10 px-4 anim-form">
     <div class="bg-white border border-slate-200 rounded-2xl shadow-[0_12px_32px_rgba(15,23,42,0.08)] p-8">
 
-        {{-- Header --}}
+        {{-- HEADER --}}
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-2xl md:text-3xl font-semibold text-slate-900">
@@ -34,7 +34,6 @@
             </a>
         </div>
 
-        {{-- FORM --}}
         <form action="{{ route('admin.manajemen_user.update', ['manajemen_user' => $user->id]) }}"
               method="POST"
               enctype="multipart/form-data"
@@ -42,7 +41,7 @@
             @csrf
             @method('PUT')
 
-            {{-- Username & Email --}}
+            {{-- USERNAME & EMAIL --}}
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -54,8 +53,12 @@
                         value="{{ old('name', $user->name) }}"
                         required
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
-                            focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
-
+                               bg-white text-slate-900 placeholder:text-slate-400
+                               focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                    @error('name')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -67,11 +70,15 @@
                         value="{{ old('email', $user->email) }}"
                         required
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                               bg-white text-slate-900 placeholder:text-slate-400
                                focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                    @error('email')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-            {{-- Nama Lengkap --}}
+            {{-- NAMA LENGKAP --}}
             <div>
                 <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                     Nama Lengkap
@@ -82,12 +89,15 @@
                     value="{{ old('nama_lengkap', optional($user->profile)->nama_lengkap) }}"
                     required
                     class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                           bg-white text-slate-900 placeholder:text-slate-400
                            focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                @error('nama_lengkap')
+                    <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
-            {{-- Role & Divisi --}}
+            {{-- ROLE & DIVISI --}}
             <div class="grid md:grid-cols-2 gap-4">
-                {{-- ROLE --}}
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Role
@@ -96,12 +106,15 @@
                         name="role"
                         id="role-select"
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm bg-white
-                               focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                               text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                         <option value="User"   {{ $user->role == 'User'   ? 'selected' : '' }}>User</option>
                         <option value="Leader" {{ $user->role == 'Leader' ? 'selected' : '' }}>Leader</option>
                     </select>
+                    @error('role')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-                {{-- DIVISI (hanya untuk role User) --}}
+
                 <div id="divisi-group">
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Divisi (khusus Role User)
@@ -110,7 +123,7 @@
                         name="divisi_id"
                         id="divisi-select"
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm bg-white
-                               focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                               text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                         <option value="">Belum ada divisi</option>
                         @foreach($divisions as $division)
                             <option
@@ -120,10 +133,13 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('divisi_id')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-            {{-- Status Aktif --}}
+            {{-- STATUS AKTIF --}}
             <div>
                 <label class="inline-flex items-center gap-2">
                     <input type="checkbox"
@@ -135,7 +151,7 @@
                 </label>
             </div>
 
-            {{-- Alamat & Telepon (opsional) --}}
+            {{-- ALAMAT & NOMOR TELEPON --}}
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -145,7 +161,11 @@
                         name="alamat"
                         rows="2"
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                               bg-white text-slate-900 placeholder:text-slate-400
                                focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">{{ old('alamat', optional($user->profile)->alamat) }}</textarea>
+                    @error('alamat')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -156,11 +176,15 @@
                         name="nomor_telepon"
                         value="{{ old('nomor_telepon', optional($user->profile)->nomor_telepon) }}"
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                               bg-white text-slate-900 placeholder:text-slate-400
                                focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                    @error('nomor_telepon')
+                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-            {{-- Tombol --}}
+            {{-- BUTTONS --}}
             <div class="pt-4 flex flex-col sm:flex-row gap-3">
                 <button
                     type="submit"

@@ -5,7 +5,6 @@
 @section('content')
 <div class="max-w-6xl mx-auto px-4 lg:px-0 py-8 space-y-8">
 
-    {{-- ================= HEADER ================= --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="space-y-2">
             <div class="inline-flex items-center gap-3">
@@ -25,27 +24,25 @@
                 </div>
             </div>
             <p class="text-xs sm:text-sm text-slate-500">
-                Kelola struktur divisi, leader, dan anggota untuk memastikan alur persetujuan cuti berjalan rapi.
+                Kelola struktur divisi, leader, dan anggota.
             </p>
         </div>
 
         <a href="{{ route('admin.division.create') }}"
            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
-                  bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-[0.7rem] font-semibold
-                  tracking-[0.18em] uppercase shadow-[0_12px_30px_rgba(37,99,235,0.45)]
-                  hover:from-sky-500 hover:to-indigo-500 hover:translate-y-[-1px] transition">
+                  bg-sky-50 text-sky-700 text-[0.7rem] font-semibold border border-sky-300
+                  tracking-[0.18em] uppercase shadow-sm
+                  hover:bg-sky-100 hover:border-sky-400 hover:-translate-y-[1px] transition">
             <span class="text-base leading-none">+</span>
             <span>Tambah Divisi</span>
         </a>
     </div>
 
-    {{-- ================= FILTER ================= --}}
     <form method="GET" class="space-y-4">
         <div class="bg-white/95 backdrop-blur border border-slate-200 rounded-3xl
                     shadow-[0_18px_40px_rgba(15,23,42,0.12)] px-5 sm:px-7 py-5
                     grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            {{-- Nama Divisi --}}
             <div class="space-y-1">
                 <label class="block text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-slate-500">
                     Nama Divisi
@@ -65,10 +62,9 @@
                 </div>
             </div>
 
-            {{-- Ketua Divisi --}}
             <div class="space-y-1">
                 <label class="block text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-slate-500">
-                    Ketua Divisi
+                    Leader
                 </label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -100,7 +96,6 @@
                 </div>
             </div>
 
-            {{-- Jumlah Anggota --}}
             <div class="space-y-1">
                 <label class="block text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-slate-500">
                     Jumlah Anggota
@@ -136,7 +131,6 @@
                 </div>
             </div>
 
-            {{-- Sort --}}
             <div class="space-y-1">
                 <label class="block text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-slate-500">
                     Sortir
@@ -173,34 +167,31 @@
         <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
                     class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
-                           bg-sky-600 text-white text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                           shadow-[0_10px_25px_rgba(37,99,235,0.45)]
-                           hover:bg-sky-500 hover:translate-y-[-1px] transition">
+                           bg-sky-50 text-sky-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                           border border-sky-300 shadow-sm
+                           hover:bg-sky-100 hover:border-sky-400 hover:-translate-y-[1px] transition">
                 Terapkan Filter
             </button>
 
             <a href="{{ route('admin.division.index') }}"
                class="inline-flex items-center justify-center px-5 py-2.5 rounded-full
-                      bg-white text-slate-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                      border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition">
+                      bg-white text-slate-600 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                      border border-slate-300 shadow-sm hover:bg-slate-50 hover:border-slate-400 transition">
                 Reset
             </a>
         </div>
     </form>
 
-    {{-- ================= LIST DIVISI ================= --}}
     <div class="space-y-4">
         @forelse($divisions as $division)
             <article
                 class="rounded-3xl bg-white border border-slate-200 overflow-hidden
                        shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
 
-                {{-- top accent bar --}}
                 <div class="h-1.5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"></div>
 
                 <div class="px-5 sm:px-7 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-                    {{-- Info divisi --}}
                     <div class="space-y-2">
                         <div class="flex items-center gap-3">
                             <h3 class="font-semibold text-slate-900 tracking-[0.18em] uppercase text-xs sm:text-sm">
@@ -228,7 +219,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-600 mt-1">
                             <p>
-                                <span class="text-slate-500">Ketua Divisi:</span>
+                                <span class="text-slate-500">Leader:</span>
                                 <span class="font-semibold">
                                     {{ optional($division->ketuaDivisi)->name ?? '-' }}
                                 </span>
@@ -243,21 +234,21 @@
                         </div>
                     </div>
 
-                    {{-- Aksi --}}
                     <div class="flex flex-col sm:items-end gap-2">
+
                         <a href="{{ route('admin.division.edit', $division->id) }}"
                            class="inline-flex items-center justify-center px-4 py-1.5 rounded-full
-                                  bg-sky-600 text-white text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                                  shadow-[0_8px_20px_rgba(37,99,235,0.45)]
-                                  hover:bg-sky-500 hover:translate-y-[-1px] transition">
+                                  bg-amber-50 text-amber-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                                  border border-amber-200 shadow-sm
+                                  hover:bg-amber-100 hover:border-amber-300 hover:-translate-y-[1px] transition">
                             Edit Divisi
                         </a>
 
                         <a href="{{ route('admin.division.members', $division->id ?? $division->id) ?? '#' }}"
                            class="inline-flex items-center justify-center px-4 py-1.5 rounded-full
-                                  bg-emerald-500 text-white text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                                  shadow-[0_8px_20px_rgba(16,185,129,0.4)]
-                                  hover:bg-emerald-400 hover:translate-y-[-1px] transition">
+                                  bg-emerald-50 text-emerald-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                                  border border-emerald-200 shadow-sm
+                                  hover:bg-emerald-100 hover:border-emerald-300 hover:-translate-y-[1px] transition">
                             Kelola Anggota
                         </a>
 
@@ -268,9 +259,9 @@
                             @method('DELETE')
                             <button type="submit"
                                     class="inline-flex items-center justify-center px-4 py-1.5 rounded-full
-                                           bg-rose-600 text-white text-[0.7rem] font-semibold tracking-[0.18em] uppercase
-                                           shadow-[0_8px_20px_rgba(225,29,72,0.5)]
-                                           hover:bg-rose-500 hover:translate-y-[-1px] transition">
+                                           bg-rose-50 text-rose-700 text-[0.7rem] font-semibold tracking-[0.18em] uppercase
+                                           border border-rose-200 shadow-sm
+                                           hover:bg-rose-100 hover:border-rose-300 hover:-translate-y-[1px] transition">
                                 Hapus
                             </button>
                         </form>

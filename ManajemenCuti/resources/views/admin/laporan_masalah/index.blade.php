@@ -12,7 +12,6 @@
 
 <div class="max-w-6xl mx-auto mt-10 px-4 page-anim">
 
-    {{-- Header --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h2 class="text-2xl md:text-3xl font-semibold text-slate-900 flex items-center gap-3">
@@ -29,7 +28,6 @@
         </div>
     </div>
 
-    {{-- Filter Bar (disederhanakan) --}}
     <div class="mb-6 bg-white border border-slate-200 rounded-2xl shadow-[0_12px_32px_rgba(15,23,42,0.08)] p-5">
         <form method="GET" class="grid md:grid-cols-3 gap-4 items-end text-xs">
 
@@ -47,7 +45,6 @@
                 </select>
             </div>
 
-            {{-- Status --}}
             <div class="space-y-1">
                 <label class="font-semibold tracking-[0.12em] uppercase text-slate-700 text-[0.75rem]">
                     Status
@@ -62,7 +59,6 @@
                 </select>
             </div>
 
-            {{-- Pengajuan Dari --}}
             <div class="space-y-1">
                 <label class="font-semibold tracking-[0.12em] uppercase text-slate-700 text-[0.75rem]">
                     Pengajuan Dari
@@ -90,7 +86,6 @@
         </form>
     </div>
 
-    {{-- Tabel Laporan Masalah (tidak diubah) --}}
     <div class="overflow-x-auto bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)] rounded-2xl border border-slate-200">
         <table class="min-w-full">
             <thead class="bg-slate-50 border-b border-slate-200">
@@ -109,8 +104,13 @@
             <tbody>
                 @forelse ($laporan as $cuti)
                     @php
-                        $status = $cuti->status ?? 'pending';
-                        if ($status === 'pending' && $cuti->created_at->lte(now()->subDays(7))) {
+                        // status asli dari DB (contoh: "Rejected", "Cancelled", "Pending")
+                        $statusRaw  = $cuti->status ?? 'Pending';
+                        // untuk logika, kita pakai lowercase supaya konsisten
+                        $status     = strtolower($statusRaw);
+
+                        // Tentukan label masalah
+                        if ($status === 'pending' && optional($cuti->created_at)->lte(now()->subDays(7))) {
                             $labelMasalah = 'Pending lebih dari 7 hari';
                         } elseif ($status === 'rejected') {
                             $labelMasalah = 'Ditolak (Leader / HRD)';
@@ -120,6 +120,7 @@
                             $labelMasalah = '-';
                         }
 
+                        // Badge warna
                         $badgeClass = match($status) {
                             'pending'   => 'bg-amber-50 border-amber-300 text-amber-900',
                             'rejected'  => 'bg-rose-50  border-rose-300  text-rose-900',
@@ -150,7 +151,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm align-top">
                             <span class="inline-flex px-3 py-1 rounded-full text-[0.7rem] font-semibold tracking-[0.14em] uppercase border {{ $badgeClass }}">
-                                {{ strtoupper(str_replace('_', ' ', $status)) }}
+                                {{ strtoupper(str_replace('_', ' ', $statusRaw)) }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-rose-800 font-semibold align-top">

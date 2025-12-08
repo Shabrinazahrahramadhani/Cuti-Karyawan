@@ -14,7 +14,6 @@
 
 <div class="max-w-6xl mx-auto mt-10 px-4 anim-page">
 
-    {{-- Header --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h2 class="text-2xl md:text-3xl font-semibold text-slate-900 flex items-center gap-3">
@@ -40,11 +39,10 @@
         </a>
     </div>
 
-    {{-- Filter & Sorting --}}
     <form method="GET" class="mb-8 mt-6">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.08)] p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            {{-- Role --}}
+
             <div>
                 <label class="block text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-600 mb-1">
                     Role
@@ -59,7 +57,6 @@
                 </select>
             </div>
 
-            {{-- Divisi --}}
             <div>
                 <label class="block text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-600 mb-1">
                     Divisi
@@ -76,7 +73,6 @@
                 </select>
             </div>
 
-            {{-- Status --}}
             <div>
                 <label class="block text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-600 mb-1">
                     Status
@@ -89,7 +85,6 @@
                 </select>
             </div>
 
-            {{-- Masa Kerja --}}
             <div>
                 <label class="block text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-600 mb-1">
                     Masa Kerja
@@ -102,8 +97,7 @@
                 </select>
             </div>
         </div>
-
-        {{-- Sorting + Tombol --}}
+\
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6">
             <div class="inline-flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
                 <span class="text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-700">
@@ -140,7 +134,6 @@
         </div>
     </form>
 
-    {{-- TABLE USERS --}}
     <div class="mt-4 overflow-x-auto bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)] rounded-2xl border border-slate-200">
         <table class="min-w-full text-sm">
             <thead class="bg-slate-50 border-b border-slate-200">
@@ -152,7 +145,7 @@
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold text-[0.7rem] tracking-[0.16em] uppercase">Divisi</th>
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold text-[0.7rem] tracking-[0.16em] uppercase">Status</th>
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold text-[0.7rem] tracking-[0.16em] uppercase">Masa Kerja</th>
-                    <th class="px-4 py-3 text-center text-slate-600 font-semibold text-[0.7rem] tracking-[0.16em] uppercase">Aksi</th>
+                    <th class="px-4 py-3 text-center text-slate-600 font-semibold text-[0.7rem] tracking-[0.16em] uppercase">Actions</th>
                 </tr>
             </thead>
 
@@ -202,7 +195,6 @@
                             {{ $masaKerjaStr }}
                         </td>
 
-                        {{-- ACTIONS --}}
 <td class="px-4 py-3 text-center">
     <div class="inline-flex flex-wrap gap-2 justify-center">
 
@@ -214,14 +206,12 @@
             </span>
         @else
 
-            {{-- Edit --}}
             <a href="{{ route('admin.manajemen_user.edit', $user->id) }}"
                class="inline-flex items-center justify-center bg-amber-100 text-amber-900 py-1.5 px-3 rounded-lg text-[0.7rem] font-semibold
                       tracking-[0.12em] uppercase border border-amber-300 hover:bg-amber-200 transition">
                 Edit
             </a>
 
-            {{-- Toggle Aktif / Nonaktif --}}
             @if($statusAktif)
                 <form action="{{ route('admin.manajemen_user.toggle_active', $user->id) }}"
                       method="POST"
@@ -248,7 +238,7 @@
                 </form>
             @endif
 
-            {{-- Delete --}}
+     
             <form action="{{ route('admin.manajemen_user.destroy', $user->id) }}"
                   method="POST"
                   onsubmit="return confirm('Yakin ingin menghapus user ini?')">

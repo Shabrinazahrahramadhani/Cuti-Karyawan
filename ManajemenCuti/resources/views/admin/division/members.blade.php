@@ -14,7 +14,6 @@
 
 <div class="max-w-6xl mx-auto mt-10 px-4 anim-page">
 
-    {{-- Flash message --}}
     @if(session('success'))
         <div class="mb-6 flex items-center gap-3 px-5 py-3 bg-emerald-50 border border-emerald-200 
                     text-emerald-800 rounded-xl text-xs shadow-sm">
@@ -52,7 +51,7 @@
                 </span>
             </h2>
             <p class="mt-2 text-xs text-slate-500">
-                Kelola anggota karyawan untuk divisi ini. Penghapusan anggota tidak menghapus akun pengguna.
+                Kelola anggota karyawan untuk divisi ini.
             </p>
         </div>
 
@@ -64,7 +63,6 @@
         </a>
     </div>
 
-    {{-- Info Divisi + Form --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {{-- Info --}}
         <div class="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-[0_10px_26px_rgba(15,23,42,0.06)]">
@@ -76,7 +74,7 @@
                 {{ $division->nama_divisi }}
             </p>
             <p class="text-xs text-slate-700 mt-1">
-                <span class="font-semibold">Ketua Divisi:</span>
+                <span class="font-semibold">Leader:</span>
                 {{ optional($division->ketuaDivisi)->name ?? '-' }}
             </p>
             <p class="text-xs text-slate-700 mt-1">
@@ -92,7 +90,6 @@
             @endif
         </div>
 
-        {{-- Form Tambah --}}
         <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-4 shadow-[0_10px_26px_rgba(15,23,42,0.06)]">
             <h3 class="text-sm font-semibold tracking-[0.16em] uppercase text-slate-700 mb-3">
                 Tambah Anggota
@@ -146,7 +143,7 @@
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold tracking-[0.16em] uppercase text-[0.7rem]">Nama</th>
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold tracking-[0.16em] uppercase text-[0.7rem]">Email</th>
                     <th class="px-4 py-3 text-left text-slate-600 font-semibold tracking-[0.16em] uppercase text-[0.7rem]">Role</th>
-                    <th class="px-4 py-3 text-center text-slate-600 font-semibold tracking-[0.16em] uppercase text-[0.7rem]">Aksi</th>
+                    <th class="px-4 py-3 text-center text-slate-600 font-semibold tracking-[0.16em] uppercase text-[0.7rem]">Action</th>
                 </tr>
             </thead>
 

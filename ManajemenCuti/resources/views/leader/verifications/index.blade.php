@@ -54,7 +54,10 @@
 
                 @foreach($requests as $req)
                     @php
-                        $isSakit = $req->jenis_cuti === 'Sakit';
+                        $isSakit   = $req->jenis_cuti === 'Sakit';
+                        $profile   = $req->user->profile ?? null;
+                        $fotoUrl   = $profile && $profile->foto ? asset('storage/'.$profile->foto) : null;
+                        $initial   = strtoupper(mb_substr($req->user->name, 0, 1));
                     @endphp
 
                     <article
@@ -66,13 +69,22 @@
 
                         <div class="px-5 sm:px-7 py-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-slate-800">
 
-                            {{-- Info Pengaju --}}
+                            {{-- Info Pengaju (termasuk FOTO) --}}
                             <div class="flex-1 space-y-2">
                                 <div class="flex items-center gap-3 mb-1">
-                                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700
-                                                text-white flex items-center justify-center text-base font-semibold shadow-lg">
-                                        {{ strtoupper(substr($req->user->name, 0, 1)) }}
-                                    </div>
+                                    @if($fotoUrl)
+                                        <div class="w-10 h-10 rounded-2xl overflow-hidden shadow-lg border border-slate-200">
+                                            <img src="{{ $fotoUrl }}"
+                                                 alt="Foto {{ $req->user->name }}"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    @else
+                                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700
+                                                    text-white flex items-center justify-center text-base font-semibold shadow-lg">
+                                            {{ $initial }}
+                                        </div>
+                                    @endif
+
                                     <div>
                                         <p class="font-semibold text-slate-900">
                                             {{ $req->user->name }}
@@ -131,8 +143,8 @@
                                     </p>
                                 @endif
 
-                                <a href="{{ route('verifications.show', $req) }}"
-                                   class="inline-flex items-center mt-2 text-[0.72rem] text-sky-700 hover:text-sky-600 hover:underline">
+                                <a href="{{ route('verifications.show', $req) }}
+                                   " class="inline-flex items-center mt-2 text-[0.72rem] text-sky-700 hover:text-sky-600 hover:underline">
                                     Lihat detail lengkap →
                                 </a>
                             </div>
@@ -153,43 +165,46 @@
                                     </button>
                                 </form>
 
-                                {{-- Reject --}}
-                                <details class="w-full group">
-                                    <summary
-                                        class="px-4 py-2 rounded-full border border-rose-400
-                                               bg-rose-50 text-rose-700 text-[0.75rem] font-semibold
-                                               tracking-[0.18em] uppercase cursor-pointer
-                                               hover:bg-rose-100 transition list-none flex items-center justify-between">
-                                        <span>Reject dengan alasan</span>
-                                        <span class="text-[0.8rem] group-open:rotate-180 transition-transform">⌄</span>
-                                    </summary>
+                            {{-- Reject --}}
+                                    <details class="w-full group">
+                                        <summary
+                                            class="px-4 py-2 rounded-full border border-rose-400
+                                                bg-rose-50 text-rose-700 text-[0.75rem] font-semibold
+                                                tracking-[0.18em] uppercase cursor-pointer
+                                                hover:bg-rose-100 transition list-none flex items-center justify-between">
+                                            <span>Reject dengan alasan</span>
+                                            <span class="text-[0.8rem] group-open:rotate-180 transition-transform">⌄</span>
+                                        </summary>
 
-                                    <div class="mt-2 p-3 border border-rose-200 rounded-2xl bg-rose-50">
-                                        <form action="{{ route('verifications.reject', $req) }}" method="POST" class="space-y-2">
-                                            @csrf
-                                            <label class="block text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-rose-800">
-                                                Alasan Penolakan
-                                            </label>
-                                            <textarea name="catatan"
-                                                      rows="3"
-                                                      class="w-full text-xs rounded-2xl border border-rose-300 bg-white
-                                                             px-3 py-2 text-slate-800 resize-y
-                                                             focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400"
-                                                      required
-                                                      minlength="10"
-                                                      placeholder="Tuliskan alasan penolakan yang jelas (minimal 10 karakter)...">{{ old('catatan') }}</textarea>
+                                        <div class="mt-2 p-3 border border-rose-200 rounded-2xl bg-rose-50">
+                                            <form action="{{ route('verifications.reject', $req) }}" method="POST" class="space-y-2">
+                                                @csrf
+                                                <label class="block text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-rose-800">
+                                                    Alasan Penolakan
+                                                </label>
+                                                <textarea name="note"
+                                                        rows="3"
+                                                        class="w-full text-xs rounded-2xl border border-rose-300 bg-white
+                                                                px-3 py-2 text-slate-800 resize-y
+                                                                focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400"
+                                                        required
+                                                        placeholder="Tuliskan alasan penolakan yang jelas...">{{ old('note') }}</textarea>
 
-                                            <button type="submit"
-                                                    class="w-full mt-1 px-4 py-2 rounded-full
-                                                           bg-rose-600 text-white text-[0.75rem] font-semibold
-                                                           tracking-[0.18em] uppercase
-                                                           shadow-[0_10px_26px_rgba(225,29,72,0.7)]
-                                                           hover:bg-rose-500 hover:-translate-y-[1px] transition">
-                                                Kirim Penolakan
-                                            </button>
-                                        </form>
-                                    </div>
-                                </details>
+                                                @error('note')
+                                                    <p class="mt-1 text-[0.7rem] text-rose-600 font-semibold">{{ $message }}</p>
+                                                @enderror
+
+                                                <button type="submit"
+                                                        class="w-full mt-1 px-4 py-2 rounded-full
+                                                            bg-rose-600 text-white text-[0.75rem] font-semibold
+                                                            tracking-[0.18em] uppercase
+                                                            shadow-[0_10px_26px_rgba(225,29,72,0.7)]
+                                                            hover:bg-rose-500 hover:-translate-y-[1px] transition">
+                                                    Kirim Penolakan
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </details>
                             </div>
 
                         </div>

@@ -13,7 +13,8 @@
 </style>
 
 <div class="max-w-4xl mx-auto mt-10 px-4 anim-form">
-    <div class="bg-white border border-slate-200 rounded-2xl shadow-[0_14px_40px_rgba(15,23,42,0.08)] p-8 relative overflow-hidden">
+    {{-- card utama: teks default gelap --}}
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-[0_14px_40px_rgba(15,23,42,0.08)] p-8 relative overflow-hidden text-slate-900">
 
         {{-- dekorasi halus --}}
         <div class="pointer-events-none absolute -top-16 -right-8 w-40 h-40 bg-sky-100 rounded-full blur-3xl opacity-70"></div>
@@ -45,14 +46,12 @@
                 </a>
             </div>
 
-            {{-- FORM --}}
             <form action="{{ route('admin.manajemen_user.store') }}"
                   method="POST"
                   enctype="multipart/form-data"
                   class="space-y-5">
                 @csrf
 
-                {{-- Nama Pengguna (disimpan ke kolom users.name) & Nama Lengkap --}}
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -64,6 +63,7 @@
                             value="{{ old('name') }}"
                             required
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                         @error('name')
                             <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
@@ -80,6 +80,7 @@
                             value="{{ old('nama_lengkap') }}"
                             required
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                         @error('nama_lengkap')
                             <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
@@ -87,7 +88,6 @@
                     </div>
                 </div>
 
-                {{-- Email --}}
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Email
@@ -98,13 +98,13 @@
                         value="{{ old('email') }}"
                         required
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                               text-slate-900 placeholder-slate-400
                                focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                     @error('email')
                         <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Password & Konfirmasi --}}
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -115,6 +115,7 @@
                             name="password"
                             required
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                         @error('password')
                             <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
@@ -130,11 +131,11 @@
                             name="password_confirmation"
                             required
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                     </div>
                 </div>
 
-                {{-- Role & Divisi --}}
                 <div class="grid md:grid-cols-2 gap-4">
                     {{-- ROLE --}}
                     <div>
@@ -145,17 +146,17 @@
                             name="role"
                             id="role-select"
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm bg-white
+                                   text-slate-900
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                             <option value="">Pilih role</option>
                             <option value="User"   {{ old('role') === 'User'   ? 'selected' : '' }}>User</option>
-                            <option value="Leader" {{ old('role') === 'Leader' ? 'selected' : '' }}>Ketua Divisi</option>
+                            <option value="Leader" {{ old('role') === 'Leader' ? 'selected' : '' }}>Leader</option>
                         </select>
                         @error('role')
                             <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- DIVISI (hanya untuk role User) --}}
                     <div id="divisi-group">
                         <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                             Divisi (khusus Role User)
@@ -164,6 +165,7 @@
                             name="divisi_id"
                             id="divisi-select"
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm bg-white
+                                   text-slate-900
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                             <option value="">Belum ada divisi</option>
                             @foreach($divisions as $division)
@@ -178,7 +180,6 @@
                     </div>
                 </div>
 
-                {{-- Kuota Cuti Tahunan (info saja, fix 12 hari) --}}
                 <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Kuota Cuti Tahunan
@@ -193,7 +194,6 @@
                     </p>
                 </div>
 
-                {{-- Status Aktif --}}
                 <div>
                     <label class="inline-flex items-center gap-2">
                         <input type="checkbox"
@@ -205,7 +205,6 @@
                     </label>
                 </div>
 
-                {{-- Alamat & Telepon --}}
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -215,6 +214,7 @@
                             name="alamat"
                             rows="2"
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">{{ old('alamat') }}</textarea>
                     </div>
                     <div>
@@ -226,12 +226,11 @@
                             name="nomor_telepon"
                             value="{{ old('nomor_telepon') }}"
                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm
+                                   text-slate-900 placeholder-slate-400
                                    focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
                     </div>
                 </div>
-
-                {{-- Foto Profil (opsional) --}}
-                <div>
+                <!-- <div>
                     <label class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
                         Foto Profil (opsional)
                     </label>
@@ -244,10 +243,9 @@
                                   hover:file:bg-sky-100">
                     <p class="text-[0.7rem] text-slate-400 mt-1">
                         Maksimal 2MB. Format: JPG, PNG, dll.
-                    </p>
+                    </p> -->
                 </div>
 
-                {{-- Tombol --}}
                 <div class="pt-4 flex flex-col sm:flex-row gap-3 justify-end">
                     <a href="{{ route('admin.manajemen_user.index') }}"
                        class="px-6 py-2.5 rounded-xl bg-slate-50 text-slate-700 text-[0.75rem] font-semibold

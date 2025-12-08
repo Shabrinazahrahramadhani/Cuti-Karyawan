@@ -56,11 +56,17 @@
                                 Karyawan
                             @endif
                         </p>
-                        @if(optional($profile->division)->nama_divisi)
+                       @php
+                            $divisionName = optional(optional($profile)->division)->nama_divisi;
+                        @endphp
+
+                        @if($divisionName)
                             <p class="text-[0.7rem] text-slate-500 mt-0.5">
-                                Divisi: <span class="font-semibold text-slate-700">
-                                    {{ $profile->division->nama_divisi }}
-                                </span>
+                                Divisi: <span class="font-semibold text-slate-700">{{ $divisionName }}</span>
+                            </p>
+                        @else
+                            <p class="text-[0.7rem] text-slate-500 mt-0.5">
+                                Divisi: <span class="font-semibold text-slate-700">-</span>
                             </p>
                         @endif
                     </div>

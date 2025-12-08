@@ -44,7 +44,6 @@
                            focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
             </div>
 
-            {{-- Deskripsi --}}
             <div>
                 <label for="deskripsi"
                        class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -58,7 +57,6 @@
                            focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">{{ old('deskripsi', $division->deskripsi) }}</textarea>
             </div>
 
-            {{-- Leader --}}
             <div>
                 <label for="ketua_divisi_id"
                     class="block text-[0.75rem] font-semibold text-slate-700 mb-1 tracking-[0.14em] uppercase">
@@ -80,7 +78,6 @@
                 </select>
             </div>
 
-            {{-- Buttons --}}
             <div class="pt-3 flex gap-3">
                 <button
                     type="submit"
