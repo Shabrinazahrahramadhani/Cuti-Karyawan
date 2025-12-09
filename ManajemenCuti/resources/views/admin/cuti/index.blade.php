@@ -71,7 +71,6 @@
         </div>
     </div>
 
-    {{-- FILTER BAR --}}
     <div class="mb-6 bg-white border border-slate-200 rounded-3xl 
                 shadow-[0_8px_22px_rgba(15,23,42,0.08)] p-5 anim-fade-up-delay-1">
 

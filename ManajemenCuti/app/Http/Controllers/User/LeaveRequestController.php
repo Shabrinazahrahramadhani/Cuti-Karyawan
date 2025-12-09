@@ -62,7 +62,6 @@ class LeaveRequestController extends Controller
             ]);
         }
 
-        // Validasi khusus Cuti Tahunan
         if ($jenisCuti === 'Tahunan') {
             if (!$profile) {
                 return back()->withInput()->withErrors([
@@ -124,10 +123,10 @@ class LeaveRequestController extends Controller
         // Anggap siapapun yang role-nya BUKAN 'user' (case-insensitive) adalah atasan (leader)
         $isLeader = (strtolower($user->role) !== 'user');
 
-        $statusAwal       = $isLeader ? 'Approved by Leader' : 'Pending';
-        $leaderId         = $isLeader ? $user->id : null;
-        $approvedLeaderAt = $isLeader ? now() : null;
-        $catatanLeader    = $isLeader ? 'Pengajuan cuti pribadi atasan (auto-approve).' : null;
+        $statusAwal       = 'Pending';
+        $leaderId         = null;
+        $approvedLeaderAt = null;
+        $catatanLeader    = null;
 
         $data = [
             'user_id'            => $user->id,

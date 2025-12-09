@@ -50,7 +50,6 @@
             background-color: #020617;
         }
 
-        /* background dekoratif belakang seluruh app */
         .app-bg-layer {
             position: fixed;
             inset: 0;

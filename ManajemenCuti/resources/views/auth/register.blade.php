@@ -52,20 +52,24 @@
         }
     </script>
     <style>
+        /* Latar Belakang DIUBAH MENJADI PUTIH POLOS (slate-100) */
         body {
             background-color: #f1f5f9; 
         }
- 
+        
+        /* Menghilangkan lapisan background gelap */
         .app-bg-layer {
             display: none;
         }
 
+        /* Card Style (LIGHT) */
         .auth-card {
             background: #ffffff;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid #f1f5f9; 
+            border: 1px solid #f1f5f9; /* Border sangat tipis */
         }
 
+        /* Gaya Tombol Utama (Warna tetap biru) */
         .btn-brand-primary {
             background: linear-gradient(135deg, #1d4ed8, #38bdf8);
             box-shadow: 0 12px 24px rgba(37, 99, 235, 0.4); 
@@ -80,25 +84,27 @@
             box-shadow: 0 16px 30px rgba(37, 99, 235, 0.55);
         }
 
+        /* Gaya Input Field (Light Theme) */
         .form-input-modern {
             background: #ffffff;
             border-radius: 0.9rem;
-            border: 1px solid #cbd5e1; 
+            border: 1px solid #cbd5e1; /* slate-300 */
             padding: 0.7rem 0.95rem;
             font-size: 0.9rem;
-            color: #0f172a; 
+            color: #0f172a; /* slate-900 (Text gelap) */
             box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.1);
             outline: none;
             transition: all 0.16s ease;
         }
         .form-input-modern:focus {
             background: #ffffff;
-            border-color: #2563eb; 
+            border-color: #2563eb; /* brand-primary */
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
         }
 
+        /* Gaya Label (Dark Text) */
         .form-label-modern {
-            color: #334155; 
+            color: #334155; /* slate-700 (Text gelap) */
             font-weight: 600;
             font-size: 0.78rem;
             text-transform: uppercase;
@@ -109,10 +115,13 @@
 
 
 <body class="font-sans min-h-screen flex items-center justify-center py-12 text-slate-900">
+    {{-- div.app-bg-layer dihapus --}}
 
     <div class="w-full max-w-md px-4">
+        {{-- Card Register Modern (LIGHT) --}}
         <div class="auth-card p-8 sm:p-10 rounded-3xl relative z-10">
 
+            {{-- Area untuk Menampilkan Validation Error (Opsional) --}}
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-red-50 border border-red-300 text-red-700 rounded-xl">
                     <p class="font-semibold text-sm mb-1">Terjadi Kesalahan</p>
@@ -124,6 +133,7 @@
                 </div>
             @endif
 
+            {{-- Header Card --}}
             <div class="flex flex-col items-center mb-10 text-center">
                 {{-- Logo --}}
                 <div class="w-12 h-12 rounded-xl bg-brand-primary text-white flex items-center justify-center text-xl font-extrabold uppercase shadow-lg shadow-brand-primary/40">
@@ -137,9 +147,11 @@
                 </p>
             </div>
 
+            {{-- Form Register --}}
             <form method="POST" action="{{ route('register') }}" class="space-y-6">
                 @csrf
 
+                {{-- Nama --}}
                 <div>
                     <label for="name" class="form-label-modern block mb-2">
                         Nama Lengkap
@@ -149,6 +161,7 @@
                            class="form-input-modern w-full">
                 </div>
 
+                {{-- Email --}}
                 <div>
                     <label for="email" class="form-label-modern block mb-2">
                         Email
@@ -158,6 +171,7 @@
                            class="form-input-modern w-full">
                 </div>
 
+                {{-- Password --}}
                 <div>
                     <label for="password" class="form-label-modern block mb-2">
                         Password
@@ -166,6 +180,7 @@
                            class="form-input-modern w-full">
                 </div>
 
+                {{-- Konfirmasi Password --}}
                 <div>
                     <label for="password_confirmation" class="form-label-modern block mb-2">
                         Konfirmasi Password
