@@ -128,7 +128,11 @@ Route::middleware(['auth', 'role:Leader'])->group(function () {
 
     Route::get('/verifications/{leaveRequest}', [LeaderLeaveVerificationController::class, 'show'])->name('verifications.show');
 
-    Route::get('/leave-history', [LeaderLeaveHistoryController::class, 'index'])->name('leave-history');
+    // Riwayat cuti pribadi Leader (dipakai di layouts: route('leave-history'))
+    Route::get('/leader/leave/history', [LeaveRequestController::class, 'history'])->name('leave-history');
+
+    // Ini riwayat cuti anggota divisi (boleh tetap, sesuai controller kamu)
+    Route::get('/leader/cuti-saya', [LeaderLeaveHistoryController::class, 'index'])->name('leader.leave.history');
 
     Route::get('/leader/leave/create', [LeaveRequestController::class, 'create'])->name('leader.leave.create');
     Route::post('/leader/leave', [LeaveRequestController::class, 'store'])->name('leader.leave.store');
@@ -145,11 +149,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
-    Route::get('/user/leave/create',        [LeaveRequestController::class, 'create'])->name('user.leave.create');
-    Route::post('/leave',             [LeaveRequestController::class, 'store'])->name('leave.store');
-    Route::get('/user/leave/history',      [LeaveRequestController::class, 'history'])->name('user.leave.history');
-    Route::get('/user/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('user.leave.show');
-    Route::post('/leave/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave.cancel');
+    Route::get('/user/leave/create',           [LeaveRequestController::class, 'create'])->name('user.leave.create');
+    Route::post('/leave',                      [LeaveRequestController::class, 'store'])->name('leave.store');
+    Route::get('/user/leave/history',          [LeaveRequestController::class, 'history'])->name('user.leave.history');
+
+    // Detail cuti (nama lama, kalau kepakai di tempat lain)
+    Route::get('/user/leave/{leaveRequest}',   [LeaveRequestController::class, 'show'])->name('user.leave.show');
+
+    // Alias route untuk tombol Detail di riwayat cuti: route('leave.show', $leave->id)
+    Route::get('/leave/{leaveRequest}',        [LeaveRequestController::class, 'show'])->name('leave.show');
+
+    Route::post('/leave/{leaveRequest}/cancel',[LeaveRequestController::class, 'cancel'])->name('leave.cancel');
 
 });
 

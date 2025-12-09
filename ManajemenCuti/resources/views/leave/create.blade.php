@@ -211,7 +211,7 @@
                     <label class="block text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-slate-500">
                         Alamat Selama Cuti
                     </label>
-                    <textarea name="alamat_cuti" rows="2"
+                    <textarea name="alamat_selama_cuti" rows="2"
                               class="w-full text-sm rounded-2xl border border-slate-300 bg-slate-50/80
                                      px-3 py-2.5 text-slate-800 resize-y
                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

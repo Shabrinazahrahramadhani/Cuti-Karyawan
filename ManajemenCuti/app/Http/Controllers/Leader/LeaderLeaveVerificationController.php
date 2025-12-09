@@ -16,7 +16,6 @@ class LeaderLeaveVerificationController extends Controller
     {
         $leader = Auth::user();
 
-        // cari divisi yang dipimpin leader ini
         $division = Division::where('ketua_divisi_id', $leader->id)->first();
 
         if (!$division) {
@@ -26,7 +25,6 @@ class LeaderLeaveVerificationController extends Controller
             ]);
         }
 
-        // ambil anggota divisi, TAPI exclude leader sendiri
         $anggotaIds = UserProfile::where('divisi_id', $division->id)
             ->where('user_id', '!=', $leader->id)
             ->pluck('user_id');
@@ -61,7 +59,6 @@ class LeaderLeaveVerificationController extends Controller
             'note' => 'nullable|string|max:500',
         ]);
 
-        // CEK: leader tidak boleh memproses pengajuan dirinya sendiri
         if ($leaveRequest->user_id === $leader->id) {
             return back()->with('error', 'Leader tidak dapat menyetujui pengajuan cutinya sendiri. Pengajuan ini akan diproses oleh HRD.');
         }
@@ -70,7 +67,6 @@ class LeaderLeaveVerificationController extends Controller
             abort(403, 'Anda tidak berwenang memproses pengajuan ini.');
         }
 
-        // siapkan data update
         $updateData = [
             'status'    => 'Approved by Leader',
             'leader_id' => $leader->id,
@@ -93,7 +89,6 @@ class LeaderLeaveVerificationController extends Controller
             'note' => 'required|string|min:5',
         ]);
 
-        // CEK: leader tidak boleh memproses pengajuan dirinya sendiri
         if ($leaveRequest->user_id === $leader->id) {
             return back()->with('error', 'Leader tidak dapat menolak pengajuan cutinya sendiri. Pengajuan ini akan diproses oleh HRD.');
         }
@@ -115,7 +110,6 @@ class LeaderLeaveVerificationController extends Controller
             $updateData['catatan_penolakan'] = $request->note;
         }
 
-        // kalau karyawan (bukan leader) ditolak dan jenis cuti tahunan → kuota dikembalikan
         $profile = optional($leaveRequest->user)->profile;
         if ($leaveRequest->jenis_cuti === 'Tahunan' && $profile) {
             $profile->kuota_cuti = ($profile->kuota_cuti ?? 0) + $leaveRequest->total_hari;
@@ -129,7 +123,6 @@ class LeaderLeaveVerificationController extends Controller
 
     protected function bolehMemproses(int $leaderId, LeaveRequest $leaveRequest): bool
     {
-        // 1) leader tidak boleh memproses cutinya sendiri
         if ($leaveRequest->user_id === $leaderId) {
             return false;
         }
@@ -144,11 +137,9 @@ class LeaderLeaveVerificationController extends Controller
         $profileUser = $user?->profile;
 
         if ($profileUser && $profileUser->divisi_id) {
-            // hanya boleh memproses anggota di divisinya sendiri
             return $profileUser->divisi_id === $divisionLeader->id;
         }
 
-        // kalau user tidak punya divisi yang jelas, amankan saja: jangan boleh
         return false;
     }
 }

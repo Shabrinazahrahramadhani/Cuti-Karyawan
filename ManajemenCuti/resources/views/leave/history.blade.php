@@ -3,11 +3,19 @@
 @section('title', 'Riwayat Cuti')
 
 @section('content')
-<div class="max-w-6xl mx-auto mt-10 px-4">
+@php
+    $user = auth()->user();
+    $role = $user->role ?? 'User';
+
+    // route untuk tombol Ajukan Cuti disesuaikan per role
+    $createRoute = $role === 'Leader' ? 'leader.leave.create' : 'user.leave.create';
+@endphp
+
+<div class="max-w-6xl mx-auto mt-10 px-4 space-y-6">
 
     {{-- Flash message --}}
     @if(session('success'))
-        <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm text-emerald-800">
+        <div class="mb-2 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm text-emerald-800">
             <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white text-xs font-bold">
                 ✓
             </span>
@@ -18,7 +26,7 @@
     @endif
 
     @if(session('error'))
-        <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-700">
+        <div class="mb-2 flex items-center gap-3 px-4 py-3 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-700">
             <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-rose-500 text-white text-xs font-bold">
                 !
             </span>
@@ -29,7 +37,7 @@
     @endif
 
     {{-- Header --}}
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
             <h2 class="flex items-center gap-3 text-2xl md:text-3xl font-semibold text-slate-900">
                 <span class="inline-flex items-center justify-center w-9 h-9 rounded-2xl
@@ -42,117 +50,137 @@
                 </span>
             </h2>
             <p class="mt-2 text-xs text-slate-600">
-                Lihat status pengajuan cuti kamu dan batalkan pengajuan yang masih pending.
+                Lihat status pengajuan cuti kamu, cek alamat selama cuti, dan batalkan pengajuan yang masih pending.
             </p>
         </div>
 
-        <a href="{{ route('user.leave.create') }}"
-           class="inline-flex items-center justify-center px-4 py-2 rounded-2xl
+        <a href="{{ route($createRoute) }}"
+           class="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl
                   bg-sky-600 text-white text-[0.7rem] font-semibold tracking-[0.16em] uppercase
-                  shadow-sm hover:bg-sky-700 hover:-translate-y-0.5 transition">
+                  shadow-[0_8px_20px_rgba(37,99,235,0.45)] hover:bg-sky-500 hover:-translate-y-0.5 transition">
             + Ajukan Cuti
         </a>
     </div>
 
-    {{-- Tabel Riwayat --}}
-    <div class="overflow-x-auto bg-white rounded-3xl border border-slate-200 shadow-sm">
-        <table class="min-w-full text-sm">
-            <thead>
-                <tr class="bg-slate-50 border-b border-slate-200">
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">No</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Jenis</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Tgl Pengajuan</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Periode</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Hari</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Status</th>
-                    <th class="px-4 py-3 text-left text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Alasan</th>
-                    <th class="px-4 py-3 text-center text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-slate-500">Actions</th>
-                </tr>
-            </thead>
+    {{-- List Riwayat (kartu-kartu) --}}
+    @if($leaves->isEmpty())
+        <div class="mt-6 text-center text-sm text-slate-500 py-10 bg-white/80 rounded-3xl border border-slate-200">
+            Belum ada pengajuan cuti.
+        </div>
+    @else
+        <div class="space-y-4">
+            @foreach ($leaves as $leave)
+                @php
+                    $rawStatus = $leave->status ?? 'Pending';
+                    $status    = strtolower($rawStatus);
 
-            <tbody>
-                @forelse ($leaves as $leave)
-                    @php
-                        $rawStatus = $leave->status ?? 'Pending';
-                        $status = strtolower($rawStatus);
+                    $badgeClass = match($status) {
+                        'pending'               => 'bg-amber-100 text-amber-800 ring-amber-200',
+                        'approved by leader'    => 'bg-sky-100 text-sky-800 ring-sky-200',
+                        'approved'              => 'bg-emerald-100 text-emerald-800 ring-emerald-200',
+                        'rejected'              => 'bg-rose-100 text-rose-800 ring-rose-200',
+                        'cancelled'             => 'bg-slate-100 text-slate-700 ring-slate-200',
+                        default                 => 'bg-slate-100 text-slate-700 ring-slate-200',
+                    };
 
-                        $badgeClass = match($status) {
-                            'pending'               => 'bg-amber-100 text-amber-800 ring-amber-200',
-                            'approved by leader'    => 'bg-sky-100 text-sky-800 ring-sky-200',
-                            'approved'              => 'bg-emerald-100 text-emerald-800 ring-emerald-200',
-                            'rejected'              => 'bg-rose-100 text-rose-800 ring-rose-200',
-                            'cancelled'             => 'bg-slate-100 text-slate-700 ring-slate-200',
-                            default                 => 'bg-slate-100 text-slate-700 ring-slate-200',
-                        };
-                    @endphp
+                    $alamatCuti = $leave->alamat_selama_cuti ?? '-';
+                    $nomorDarurat = $leave->nomor_darurat ?? '-';
+                @endphp
 
-                    <tr class="border-t border-slate-100 hover:bg-slate-50/60">
-                        {{-- No --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            {{ $loop->iteration }}
-                        </td>
+                <article
+                    class="rounded-3xl bg-white border border-slate-200 overflow-hidden
+                           shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
 
-                        {{-- Jenis Cuti --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            {{ ucfirst($leave->jenis_cuti ?? '-') }}
-                        </td>
+                    {{-- top accent bar --}}
+                    <div class="h-1.5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"></div>
 
-                        {{-- Tanggal Pengajuan --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            {{ $leave->tanggal_pengajuan ? \Carbon\Carbon::parse($leave->tanggal_pengajuan)->format('d M Y') : '-' }}
-                        </td>
+                    <div class="px-5 sm:px-7 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-                        {{-- Periode --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            {{ \Carbon\Carbon::parse($leave->tanggal_mulai)->format('d M Y') }}
-                            –
-                            {{ \Carbon\Carbon::parse($leave->tanggal_selesai)->format('d M Y') }}
-                        </td>
+                        {{-- Info utama --}}
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3">
+                                <h3 class="font-semibold text-slate-900 tracking-[0.18em] uppercase text-xs sm:text-sm">
+                                    {{ ucfirst($leave->jenis_cuti ?? 'Cuti') }}
+                                </h3>
 
-                        {{-- Hari --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            {{ $leave->total_hari }}
-                        </td>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-[0.7rem] font-semibold tracking-[0.12em] uppercase ring-1 {{ $badgeClass }}">
+                                    {{ $rawStatus }}
+                                </span>
+                            </div>
 
-                        {{-- Status --}}
-                        <td class="px-4 py-3 align-top">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[0.7rem] font-semibold tracking-[0.12em] uppercase ring-1 {{ $badgeClass }}">
-                                {{ $rawStatus }}
-                            </span>
-                        </td>
+                            <p class="text-xs text-slate-600">
+                                Diajukan pada:
+                                <span class="font-semibold text-slate-800">
+                                    {{ $leave->tanggal_pengajuan ? \Carbon\Carbon::parse($leave->tanggal_pengajuan)->format('d M Y') : '-' }}
+                                </span>
+                            </p>
 
-                        {{-- Alasan --}}
-                        <td class="px-4 py-3 align-top text-slate-900">
-                            @if(strtolower($leave->status) === 'cancelled' && !empty($leave->alasan_pembatalan))
-                                <div class="space-y-1">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-600 mt-1">
+                                <p>
+                                    <span class="text-slate-500">Periode:</span>
+                                    <span class="font-semibold">
+                                        {{ \Carbon\Carbon::parse($leave->tanggal_mulai)->format('d M Y') }}
+                                        –
+                                        {{ \Carbon\Carbon::parse($leave->tanggal_selesai)->format('d M Y') }}
+                                        ({{ $leave->total_hari }} hari)
+                                    </span>
+                                </p>
+
+                                <p>
+                                    <span class="text-slate-500">Kontak Darurat:</span>
+                                    <span class="font-semibold">
+                                        {{ $nomorDarurat }}
+                                    </span>
+                                </p>
+                            </div>
+
+                            {{-- Alamat Selama Cuti --}}
+                            <p class="text-xs text-slate-600 mt-1">
+                                <span class="text-slate-500">Alamat selama cuti:</span>
+                                <span class="font-medium text-slate-800">
+                                    {{ $alamatCuti }}
+                                </span>
+                            </p>
+
+                            {{-- Alasan & Alasan Pembatalan jika ada --}}
+                            <div class="mt-2 text-xs text-slate-700 space-y-1">
+                                @if(strtolower($leave->status) === 'cancelled' && !empty($leave->alasan_pembatalan))
                                     <div>
                                         <span class="block text-[0.7rem] font-semibold text-slate-600">Alasan Pengajuan:</span>
-                                        <span class="block text-sm">{{ $leave->alasan }}</span>
+                                        <span class="block text-sm text-slate-800">{{ $leave->alasan }}</span>
                                     </div>
                                     <div>
                                         <span class="block text-[0.7rem] font-semibold text-rose-600">Alasan Pembatalan:</span>
                                         <span class="block text-sm text-rose-700">{{ $leave->alasan_pembatalan }}</span>
                                     </div>
-                                </div>
-                            @else
-                                {{ $leave->alasan }}
-                            @endif
-                        </td>
+                                @else
+                                    <span class="text-slate-500">Alasan:</span>
+                                    <span class="font-medium text-slate-800">
+                                        {{ $leave->alasan }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
 
-                        <td class="px-4 py-3 align-top text-center space-y-2">
+                        {{-- Actions --}}
+                        <div class="flex flex-col sm:items-end gap-2">
 
-                            {{-- (kalau mau, boleh tulis teks kecil info) --}}
-                            <span class="block text-[0.7rem] text-slate-400">
-                                Detail belum tersedia
-                            </span>
+                            {{-- Tombol Detail --}}
+                            <a href="{{ route('leave.show', $leave->id) }}"
+                               class="inline-flex items-center justify-center px-4 py-1.5 rounded-full
+                                      bg-white text-slate-900 text-[0.7rem] font-semibold tracking-[0.12em] uppercase
+                                      border border-slate-300 shadow-sm hover:bg-slate-50 transition">
+                                Detail
+                            </a>
 
                             {{-- Batalkan (hanya pending) --}}
                             @if($status === 'pending')
                                 <button type="button"
                                         onclick="openCancelModal({{ $leave->id }})"
-                                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-xl
-                                            bg-rose-500 text-white text-[0.7rem] font-semibold tracking-[0.12em] uppercase
-                                            shadow-sm hover:bg-rose-600 hover:-translate-y-0.5 transition">
+                                        class="inline-flex items-center justify-center px-4 py-1.5 rounded-full
+                                            bg-rose-600 text-white text-[0.7rem] font-semibold tracking-[0.12em] uppercase
+                                            shadow-[0_8px_20px_rgba(225,29,72,0.45)]
+                                            hover:bg-rose-500 hover:-translate-y-0.5 transition">
                                     Batalkan
                                 </button>
                             @else
@@ -160,18 +188,19 @@
                                     Tidak bisa dibatalkan
                                 </span>
                             @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="px-4 py-6 text-center text-sm text-slate-500">
-                            Belum ada pengajuan cuti.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                        </div>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+
+        {{-- Pagination (kalau pakai paginate) --}}
+        @if(method_exists($leaves, 'links'))
+            <div class="mt-6">
+                {{ $leaves->links() }}
+            </div>
+        @endif
+    @endif
 
 </div>
 
